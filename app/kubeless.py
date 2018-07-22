@@ -5,17 +5,15 @@ import imp
 import datetime
 import logging
 import socket
+import flask.ext
 
 from flask import Flask, jsonify, request
-from flask.ext.api import status
-from flask.ext.api.exceptions import APIException
 from multiprocessing import Process, Queue
-import bottle
 import prometheus_client as prom
 
-mod = imp.load_source('function',
-                      '/kubeless/%s.py' % os.getenv('MOD_NAME'))
-func = getattr(mod, os.getenv('FUNC_HANDLER'))
+# mod = imp.load_source('function',
+#                       '/kubeless/%s.py' % os.getenv('MOD_NAME', 'test'))
+func = 'hellox' #getattr(mod, os.getenv('FUNC_HANDLER'))
 func_port = os.getenv('FUNC_PORT', 8080)
 
 timeout = float(os.getenv('FUNC_TIMEOUT', 180))
@@ -46,7 +44,7 @@ def funcWrap(q, event, c):
     except Exception as inst:
         q.put(inst)
 
-@app.route('/', method=['GET', 'POST', 'PATCH', 'DELETE'])
+@app.route('/', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = request
     req.get_data()
@@ -83,11 +81,11 @@ def handler():
                     raise res
                 return res
 
-@app.get('/healthz')
+@app.route('/healthz', methods=['GET'])
 def healthz():
     return 'OK', 200
 
-@app.get('/metrics')
+@app.route('/metrics', methods=['GET'])
 def metrics():
     # bottle.response.content_type = prom.CONTENT_TYPE_LATEST
     app.response.headers["Content-Type"] = prom.CONTENT_TYPE_LATEST
@@ -101,5 +99,5 @@ if __name__ == '__main__':
         app,
         [logging.StreamHandler(stream=sys.stdout)],
         requestlogger.ApacheFormatter())
-    app.run(loggedapp, host='0.0.0.0', port=func_port)
+    app.run(host='0.0.0.0', port=func_port)
 
