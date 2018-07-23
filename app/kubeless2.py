@@ -11,7 +11,7 @@ from multiprocessing import Process, Queue
 import prometheus_client as prom
 
 mod = imp.load_source('function',
-                      '/kubeless/%s.py' % os.getenv('MOD_NAME'))
+                      './%s.py' % os.getenv('MOD_NAME'))
 func = getattr(mod, os.getenv('FUNC_HANDLER'))
 func_port = os.getenv('FUNC_PORT', 8080)
 
@@ -100,6 +100,7 @@ def healthz():
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
+    # bottle.response.content_type = prom.CONTENT_TYPE_LATEST
     app.response.headers["Content-Type"] = prom.CONTENT_TYPE_LATEST
     return prom.generate_latest(prom.REGISTRY)
 

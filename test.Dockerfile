@@ -1,13 +1,8 @@
-FROM bitnami/minideb:jessie
+FROM python:2.7-slim
 
-RUN install_packages python2.7 curl ca-certificates git gunicorn
-RUN curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
-RUN python2.7 ./get-pip.py
-
-RUN pip install bottle==0.12.13 cherrypy==8.9.1 wsgi-request-logger prometheus_client
+RUN pip install bottle==0.12.13 cherrypy==8.9.1 wsgi-request-logger prometheus_client lxml
 
 ADD kubeless.py /
 
-USER 1000
-
-CMD ["python2.7", "/kubeless.py"]
+EXPOSE 8080
+CMD ["python", "/kubeless.py"]
